@@ -1,13 +1,52 @@
 @import "tailwindcss";
 
+/* ─── EnviroAgent Design System ─────────────────────────── */
+
+@theme {
+  /* Navy palette */
+  --color-navy-950: #070f1c;
+  --color-navy-900: #0a1628;
+  --color-navy-800: #0f1f3a;
+  --color-navy-700: #162b52;
+  --color-navy-600: #1e3a6e;
+  --color-navy-500: #284d8a;
+
+  /* Teal palette */
+  --color-teal-300: #7ee8e2;
+  --color-teal-400: #52d9d2;
+  --color-teal-500: #3ecfc6;
+  --color-teal-600: #2aada6;
+  --color-teal-700: #1d8880;
+
+  /* Warm paper (light mode) */
+  --color-paper-50:  #faf8f4;
+  --color-paper-100: #f4f0e8;
+  --color-paper-200: #e8e2d8;
+  --color-paper-300: #d4ccbe;
+
+  /* Status colors */
+  --color-emerald-400: #34d399;
+  --color-violet-400: #a78bfa;
+  --color-amber-400:  #fbbf24;
+  --color-rose-400:   #fb7185;
+  --color-sky-400:    #38bdf8;
+
+  /* Typography */
+  --font-display: "Instrument Serif", "Georgia", serif;
+  --font-sans:    "Inter", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", "Fira Code", monospace;
+}
+
+/* ─── CSS custom properties (app-shell) ─────────────────── */
 :root {
+  /* shadcn compat */
   --background: 0 0% 100%;
   --foreground: 222.2 84% 4.9%;
   --card: 0 0% 100%;
   --card-foreground: 222.2 84% 4.9%;
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
-  --primary: 221.2 83.2% 53.3%;
+  --primary: 185 58% 52%;
   --primary-foreground: 210 40% 98%;
   --secondary: 210 40% 96%;
   --secondary-foreground: 222.2 84% 4.9%;
@@ -19,18 +58,32 @@
   --destructive-foreground: 210 40% 98%;
   --border: 214.3 31.8% 91.4%;
   --input: 214.3 31.8% 91.4%;
-  --ring: 221.2 83.2% 53.3%;
-  --radius: 0.5rem;
+  --ring: 185 58% 52%;
+  --radius: 0.75rem;
+
+  /* App shell (light) */
+  --app-bg:         #f4f0e8;
+  --app-surface:    #ffffff;
+  --app-card:       #f9f7f3;
+  --app-border:     rgba(0,0,0,0.08);
+  --app-teal:       #3ecfc6;
+  --app-teal-dim:   #2aada6;
+  --app-text-1:     #1a2540;
+  --app-text-2:     #4a6480;
+  --app-text-3:     #8fa8c0;
+  --app-sidebar:    #0a1628;
+  --app-sidebar-text: #8ba8c9;
+  --app-sidebar-active: #3ecfc6;
 }
 
-.dark {
+.dark, [data-theme="dark"] {
   --background: 222.2 84% 4.9%;
   --foreground: 210 40% 98%;
   --card: 222.2 84% 4.9%;
   --card-foreground: 210 40% 98%;
   --popover: 222.2 84% 4.9%;
   --popover-foreground: 210 40% 98%;
-  --primary: 217.2 91.2% 59.8%;
+  --primary: 185 58% 52%;
   --primary-foreground: 222.2 84% 4.9%;
   --secondary: 217.2 32.6% 17.5%;
   --secondary-foreground: 210 40% 98%;
@@ -42,9 +95,34 @@
   --destructive-foreground: 210 40% 98%;
   --border: 217.2 32.6% 17.5%;
   --input: 217.2 32.6% 17.5%;
-  --ring: 224.3 76.3% 94.1%;
+  --ring: 185 58% 52%;
+
+  /* App shell (dark) */
+  --app-bg:         #070f1c;
+  --app-surface:    #0d1c32;
+  --app-card:       #0f2040;
+  --app-border:     rgba(255,255,255,0.07);
+  --app-teal:       #3ecfc6;
+  --app-teal-dim:   #2aada6;
+  --app-text-1:     #dce9f7;
+  --app-text-2:     #7fa8d4;
+  --app-text-3:     #3d6080;
+  --app-sidebar:    #060e1a;
+  --app-sidebar-text: #6a90b8;
+  --app-sidebar-active: #3ecfc6;
 }
 
+/* ─── Age mode adjustments ───────────────────────────────── */
+[data-age="kid"] {
+  --radius: 1.25rem;
+  font-size: 1.05rem;
+}
+[data-age="senior"] {
+  font-size: 1.1rem;
+  --radius: 0.5rem;
+}
+
+/* ─── Base ───────────────────────────────────────────────── */
 * {
   border-color: hsl(var(--border));
 }
@@ -52,5 +130,49 @@
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
+  font-family: var(--font-sans);
   font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+/* App shell specific base */
+.app-shell {
+  background: var(--app-bg);
+  color: var(--app-text-1);
+  min-height: 100dvh;
+}
+
+/* Smooth transitions for theme */
+.app-shell * {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+}
+
+/* Scrollbar styling */
+.app-shell ::-webkit-scrollbar { width: 4px; height: 4px; }
+.app-shell ::-webkit-scrollbar-track { background: transparent; }
+.app-shell ::-webkit-scrollbar-thumb { background: var(--app-border); border-radius: 2px; }
+
+/* Horizon bar animation */
+@keyframes horizon-fill {
+  from { width: 0; }
+}
+.horizon-bar-fill {
+  animation: horizon-fill 1.2s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+
+/* Orbit animation for agent viz */
+@keyframes orbit {
+  from { transform: rotate(0deg) translateX(var(--orbit-r)) rotate(0deg); }
+  to   { transform: rotate(360deg) translateX(var(--orbit-r)) rotate(-360deg); }
+}
+.orbit-node {
+  animation: orbit var(--orbit-speed, 8s) linear infinite;
+}
+
+/* Pulse glow for active agents */
+@keyframes teal-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(62,207,198,0.4); }
+  50%       { box-shadow: 0 0 0 8px rgba(62,207,198,0); }
+}
+.agent-active {
+  animation: teal-pulse 2.5s ease-in-out infinite;
 }

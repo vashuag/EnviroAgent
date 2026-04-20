@@ -1,133 +1,163 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useSession } from "next-auth/react"
 import { signOut } from "@/lib/auth-client"
-import { Button } from "@/components/ui/button"
-import { Menu, X, User } from "lucide-react"
+import { Menu, X, LayoutDashboard, LogOut, ChevronDown } from "lucide-react"
 import { useState } from "react"
+
+const NAV = [
+  { name: "About",    href: "/about" },
+  { name: "Services", href: "/services" },
+  { name: "Contact",  href: "/contact" },
+]
 
 export function Navbar() {
   const { data: session, status } = useSession()
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-
-  const navigation = [
-    { name: "Home", href: "/" },
-    { name: "About", href: "/about" },
-    { name: "Services", href: "/services" },
-    { name: "Contact", href: "/contact" },
-  ]
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [userMenu, setUserMenu] = useState(false)
 
   return (
-    <nav className="bg-white shadow-sm border-b">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <Link href="/" className="flex-shrink-0">
-              <span className="text-2xl font-bold text-primary">EnviroAgent</span>
-            </Link>
-          </div>
+    <nav style={{ background: "#0a1628", borderBottom: "1px solid rgba(255,255,255,0.07)", position: "sticky", top: 0, zIndex: 50 }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", height: "64px" }}>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
-              >
-                {item.name}
-              </Link>
-            ))}
-          </div>
+        {/* Logo */}
+        <Link href="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none", flexShrink: 0 }}>
+          <Image src="/enviroagent.png" alt="EnviroAgent" width={34} height={34} style={{ borderRadius: "6px" }} />
+          <span style={{ fontFamily: "var(--font-display, serif)", fontSize: "1.1rem", color: "#dce9f7" }}>EnviroAgent</span>
+        </Link>
 
-          {/* Desktop Auth */}
-          <div className="hidden md:flex items-center space-x-4">
-            {status === "loading" ? (
-              <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse" />
-            ) : session ? (
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <User className="w-5 h-5 text-gray-600" />
-                  <span className="text-sm text-gray-700">{session.user?.name}</span>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => signOut()}
-                >
-                  Sign Out
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-2">
-                <Button variant="ghost" asChild>
-                  <Link href="/auth/signin">Sign In</Link>
-                </Button>
-                <Button asChild>
-                  <Link href="/auth/signup">Sign Up</Link>
-                </Button>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </Button>
-          </div>
+        {/* Desktop nav links */}
+        <div className="ea-nav-links" style={{ display: "flex", alignItems: "center", gap: "2px" }}>
+          {NAV.map(item => (
+            <Link key={item.name} href={item.href} style={{
+              padding: "7px 14px", borderRadius: "6px",
+              color: "#7fa8d4", fontSize: "0.875rem", textDecoration: "none",
+              transition: "color 0.15s",
+            }}
+              onMouseEnter={e => (e.currentTarget.style.color = "#dce9f7")}
+              onMouseLeave={e => (e.currentTarget.style.color = "#7fa8d4")}
+            >{item.name}</Link>
+          ))}
         </div>
 
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="text-gray-700 hover:text-primary block px-3 py-2 text-base font-medium"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
-              <div className="pt-4 border-t">
-                {session ? (
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2 px-3 py-2">
-                      <User className="w-5 h-5 text-gray-600" />
-                      <span className="text-sm text-gray-700">{session.user?.name}</span>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full mx-3"
-                      onClick={() => signOut()}
-                    >
-                      Sign Out
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-2 px-3">
-                    <Button variant="ghost" className="w-full" asChild>
-                      <Link href="/auth/signin">Sign In</Link>
-                    </Button>
-                    <Button className="w-full" asChild>
-                      <Link href="/auth/signup">Sign Up</Link>
-                    </Button>
-                  </div>
-                )}
-              </div>
+        {/* Desktop auth */}
+        <div className="ea-nav-links" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          {status === "loading" ? (
+            <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "rgba(255,255,255,0.08)" }} />
+          ) : session ? (
+            <div style={{ position: "relative" }}>
+              <button onClick={() => setUserMenu(o => !o)} style={{
+                display: "flex", alignItems: "center", gap: "8px",
+                padding: "6px 12px", borderRadius: "8px",
+                background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+                color: "#dce9f7", cursor: "pointer", fontSize: "0.85rem",
+              }}>
+                <div style={{
+                  width: "26px", height: "26px", borderRadius: "50%",
+                  background: "linear-gradient(135deg, #3ecfc6, #1e3a6e)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "0.72rem", fontWeight: 700, color: "#fff", flexShrink: 0,
+                }}>{session.user?.name?.charAt(0).toUpperCase() ?? "Y"}</div>
+                <span>{session.user?.name?.split(" ")[0]}</span>
+                <ChevronDown size={12} color="#7fa8d4" />
+              </button>
+              {userMenu && (
+                <div style={{
+                  position: "absolute", right: 0, top: "calc(100% + 6px)",
+                  background: "#0f1f3a", border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: "10px", overflow: "hidden", minWidth: "180px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+                }}>
+                  <Link href="/dashboard" onClick={() => setUserMenu(false)} style={{
+                    display: "flex", alignItems: "center", gap: "10px",
+                    padding: "11px 16px", color: "#3ecfc6", textDecoration: "none",
+                    fontSize: "0.85rem", fontWeight: 500,
+                    borderBottom: "1px solid rgba(255,255,255,0.06)",
+                  }}>
+                    <LayoutDashboard size={15} /> Dashboard
+                  </Link>
+                  <button onClick={() => { setUserMenu(false); signOut() }} style={{
+                    display: "flex", alignItems: "center", gap: "10px",
+                    padding: "11px 16px", color: "#7fa8d4",
+                    background: "none", border: "none", cursor: "pointer",
+                    fontSize: "0.85rem", width: "100%", textAlign: "left",
+                  }}>
+                    <LogOut size={15} /> Sign out
+                  </button>
+                </div>
+              )}
             </div>
-          </div>
-        )}
+          ) : (
+            <>
+              <Link href="/auth/signin" style={{
+                padding: "7px 16px", borderRadius: "7px",
+                color: "#7fa8d4", fontSize: "0.875rem", textDecoration: "none",
+                background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+              }}>Sign in</Link>
+              <Link href="/auth/signup" style={{
+                padding: "7px 16px", borderRadius: "7px",
+                background: "#3ecfc6", color: "#070f1c",
+                fontSize: "0.875rem", fontWeight: 600, textDecoration: "none",
+              }}>Get started</Link>
+            </>
+          )}
+        </div>
+
+        {/* Mobile hamburger */}
+        <button className="ea-hamburger" onClick={() => setMenuOpen(o => !o)}
+          style={{ background: "none", border: "none", color: "#7fa8d4", cursor: "pointer", padding: "4px", display: "none" }}>
+          {menuOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
       </div>
+
+      {/* Mobile menu */}
+      {menuOpen && (
+        <div style={{ background: "#0a1628", borderTop: "1px solid rgba(255,255,255,0.07)", padding: "16px 24px 20px" }}>
+          {NAV.map(item => (
+            <Link key={item.name} href={item.href} onClick={() => setMenuOpen(false)} style={{
+              display: "block", padding: "10px 0",
+              color: "#7fa8d4", fontSize: "0.9rem", textDecoration: "none",
+              borderBottom: "1px solid rgba(255,255,255,0.05)",
+            }}>{item.name}</Link>
+          ))}
+          <div style={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "8px" }}>
+            {session ? (
+              <>
+                <Link href="/dashboard" onClick={() => setMenuOpen(false)} style={{
+                  padding: "10px 16px", background: "rgba(62,207,198,0.1)",
+                  border: "1px solid rgba(62,207,198,0.3)", borderRadius: "8px",
+                  color: "#3ecfc6", textDecoration: "none", textAlign: "center", fontSize: "0.875rem", fontWeight: 500,
+                }}>Open Dashboard</Link>
+                <button onClick={() => { setMenuOpen(false); signOut() }} style={{
+                  padding: "10px 16px", background: "none", border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: "8px", color: "#7fa8d4", cursor: "pointer", fontSize: "0.875rem",
+                }}>Sign out</button>
+              </>
+            ) : (
+              <>
+                <Link href="/auth/signin" onClick={() => setMenuOpen(false)} style={{
+                  padding: "10px 16px", background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px",
+                  color: "#7fa8d4", textDecoration: "none", textAlign: "center", fontSize: "0.875rem",
+                }}>Sign in</Link>
+                <Link href="/auth/signup" onClick={() => setMenuOpen(false)} style={{
+                  padding: "10px 16px", background: "#3ecfc6", borderRadius: "8px",
+                  color: "#070f1c", textDecoration: "none", textAlign: "center", fontSize: "0.875rem", fontWeight: 600,
+                }}>Get started</Link>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @media (max-width: 768px) {
+          .ea-nav-links { display: none !important; }
+          .ea-hamburger { display: block !important; }
+        }
+      `}</style>
     </nav>
   )
 }

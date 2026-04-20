@@ -16,6 +16,7 @@
     "@radix-ui/react-toast": "^1.2.15",
     "@react-three/drei": "^9.88.13",
     "@react-three/fiber": "^8.15.19",
+    "@supabase/supabase-js": "^2.104.0",
     "@types/bcryptjs": "^3.0.0",
     "@types/pg": "^8.15.5",
     "@types/three": "^0.158.0",
