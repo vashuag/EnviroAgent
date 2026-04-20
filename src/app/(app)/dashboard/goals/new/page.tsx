@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, ArrowRight, Check } from "lucide-react"
+import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { TOOLS } from "@/components/app/mock-data"
@@ -23,6 +23,8 @@ const TODAY = new Date()
 export default function NewGoalPage() {
   const router = useRouter()
   const [step, setStep] = useState(0)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -40,6 +42,40 @@ export default function NewGoalPage() {
       ...f,
       toolIds: f.toolIds.includes(id) ? f.toolIds.filter(t => t !== id) : [...f.toolIds, id],
     }))
+  }
+
+  async function handleLaunch() {
+    setError(null)
+    setSubmitting(true)
+    try {
+      const totalDays = Number(form.horizon)
+      const endDate = new Date(Date.now() + totalDays * 86_400_000).toISOString()
+
+      const res = await fetch("/api/goals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: form.title.trim(),
+          description: form.description.trim() || null,
+          emoji: form.emoji,
+          category: form.category,
+          endDate,
+          totalDays,
+          toolIds: form.toolIds,
+        }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error ?? `Server error ${res.status}`)
+      }
+
+      router.push("/dashboard")
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Something went wrong"
+      setError(msg)
+      setSubmitting(false)
+    }
   }
 
   const canNext = [
@@ -269,6 +305,16 @@ export default function NewGoalPage() {
                   )}
                 </div>
               </div>
+
+              {error && (
+                <div style={{
+                  padding: "12px 14px", background: "rgba(248,113,113,0.1)",
+                  border: "1px solid rgba(248,113,113,0.3)", borderRadius: "8px",
+                  fontSize: "0.85rem", color: "#f87171",
+                }}>
+                  {error}
+                </div>
+              )}
             </div>
           )}
         </motion.div>
@@ -276,12 +322,12 @@ export default function NewGoalPage() {
 
       {/* Navigation */}
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: "32px" }}>
-        <button onClick={prevStep} disabled={step === 0} style={{
+        <button onClick={prevStep} disabled={step === 0 || submitting} style={{
           display: "flex", alignItems: "center", gap: "6px",
           padding: "10px 18px", background: "var(--app-card)",
           border: "1px solid var(--app-border)", borderRadius: "8px",
           color: "var(--app-text-2)", cursor: step === 0 ? "not-allowed" : "pointer",
-          opacity: step === 0 ? 0.4 : 1, fontSize: "0.875rem",
+          opacity: step === 0 || submitting ? 0.4 : 1, fontSize: "0.875rem",
         }}>
           <ArrowLeft size={15} /> Back
         </button>
@@ -297,14 +343,18 @@ export default function NewGoalPage() {
             Continue <ArrowRight size={15} />
           </button>
         ) : (
-          <button onClick={() => router.push("/dashboard")} style={{
+          <button onClick={handleLaunch} disabled={submitting} style={{
             display: "flex", alignItems: "center", gap: "6px",
-            padding: "10px 20px", background: "var(--app-teal)",
+            padding: "10px 20px", background: submitting ? "var(--app-border)" : "var(--app-teal)",
             border: "none", borderRadius: "8px",
-            color: "#070f1c", cursor: "pointer",
+            color: submitting ? "var(--app-text-3)" : "#070f1c",
+            cursor: submitting ? "not-allowed" : "pointer",
             fontSize: "0.875rem", fontWeight: 600,
           }}>
-            <Check size={15} /> Launch commitment
+            {submitting
+              ? <><Loader2 size={15} style={{ animation: "spin 1s linear infinite" }} /> Saving…</>
+              : <><Check size={15} /> Launch commitment</>
+            }
           </button>
         )}
       </div>

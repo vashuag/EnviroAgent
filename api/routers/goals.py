@@ -13,6 +13,16 @@ router = APIRouter(prefix="/goals", tags=["goals"])
 
 # ── Pydantic input models ─────────────────────────────────────────────────────
 
+class CreateGoalBody(BaseModel):
+    title: str
+    description: Optional[str] = None
+    category: Optional[str] = "general"
+    emoji: Optional[str] = "🌱"
+    endDate: str
+    totalDays: int
+    toolIds: list[str] = []
+
+
 class CheckinBody(BaseModel):
     did_action: bool
     notes: Optional[str] = None
@@ -42,6 +52,101 @@ def _assert_goal_owned(cur, goal_id: str, user_id: str) -> dict:
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Goal not found")
     return _row_to_dict(cur, row)
+
+
+# ── POST /goals ───────────────────────────────────────────────────────────────
+
+@router.post("", status_code=201)
+def create_goal(
+    body: CreateGoalBody,
+    current_user: Annotated[dict, Depends(get_current_user)],
+):
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            goal_id = str(uuid.uuid4())
+            agent_id = str(uuid.uuid4())
+            now = datetime.now(timezone.utc)
+            agent_name = "".join(body.title.split()[:2]) + "Bot"
+
+            # Insert goal
+            cur.execute(
+                """
+                INSERT INTO "Goal"
+                    (id, "userId", title, description, emoji, category,
+                     "startDate", "endDate", "totalDays", progress, status, color,
+                     "lastActivity", "createdAt", "updatedAt")
+                VALUES
+                    (%s, %s, %s, %s, %s, %s,
+                     %s, %s::timestamptz, %s, 0, 'active', '#3ecfc6',
+                     'Goal created', %s, %s)
+                RETURNING *
+                """,
+                (
+                    goal_id, current_user["id"], body.title, body.description,
+                    body.emoji, body.category,
+                    now, body.endDate, body.totalDays,
+                    now, now,
+                ),
+            )
+            goal = dict(zip([d[0] for d in cur.description], cur.fetchone()))
+
+            # Insert tool connections
+            for tool_id in body.toolIds:
+                cur.execute(
+                    """
+                    INSERT INTO "GoalTool" ("goalId", "toolId")
+                    VALUES (%s, %s)
+                    ON CONFLICT DO NOTHING
+                    """,
+                    (goal_id, tool_id),
+                )
+
+            # Spawn agent
+            cur.execute(
+                """
+                INSERT INTO "Agent"
+                    (id, "goalId", "userId", name, avatar, personality, status,
+                     "actionsToday", "totalActions", "createdAt", "updatedAt")
+                VALUES
+                    (%s, %s, %s, %s, %s, %s, 'idle', 0, 0, %s, %s)
+                RETURNING *
+                """,
+                (
+                    agent_id, goal_id, current_user["id"],
+                    agent_name, body.emoji or "🤖",
+                    "Dedicated agent — focused and proactive",
+                    now, now,
+                ),
+            )
+            agent = dict(zip([d[0] for d in cur.description], cur.fetchone()))
+
+            # Log activity
+            cur.execute(
+                """
+                INSERT INTO "ActivityLog"
+                    (id, "userId", "agentId", "goalId", "agentName", "goalTitle",
+                     action, type, details, "createdAt")
+                VALUES
+                    (%s, %s, %s, %s, %s, %s,
+                     'Commitment created', 'system',
+                     'New commitment added to EnviroAgent', %s)
+                """,
+                (
+                    str(uuid.uuid4()), current_user["id"], agent_id, goal_id,
+                    agent_name, body.title, now,
+                ),
+            )
+
+        conn.commit()
+        goal["agent"] = agent
+        goal["activity"] = []
+        return goal
+    except Exception as exc:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    finally:
+        release_connection(conn)
 
 
 # ── GET /goals ────────────────────────────────────────────────────────────────
