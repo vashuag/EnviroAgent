@@ -10,3 +10,9 @@ node_modules
 *.log
 .DS_Store
 src/generated
+api/
+api/.venv/
+api/__pycache__/
+api/**/*.pyc
+*.py
+requirements.txt
