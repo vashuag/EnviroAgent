@@ -53,6 +53,27 @@ export interface ApiActivityItem {
   createdAt: string
 }
 
+export interface ApiAgentWithGoal extends ApiAgent {
+  goalTitle: string
+  goalEmoji: string | null
+  goalColor: string | null
+  goalStatus: "active" | "paused" | "completed"
+  healthScore: number
+}
+
+export interface ApiActivityWithGoal extends ApiActivityItem {
+  goalEmoji: string | null
+}
+
+export interface ApiIntegration {
+  toolId: string
+  name: string
+  category: string
+  icon: string
+  description: string
+  connected: boolean
+}
+
 export function daysElapsed(startDate: string): number {
   const diff = Date.now() - new Date(startDate).getTime()
   return Math.max(0, Math.floor(diff / 86_400_000))

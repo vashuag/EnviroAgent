@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import goals, agent, webhooks, auth
+from routers import goals, agent, webhooks, auth, integrations
 from services.db import init_pool, close_pool, test_connection, get_table_names
 
 
@@ -35,6 +35,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(goals.router, prefix="/api/v1")
 app.include_router(agent.router, prefix="/api/v1")
+app.include_router(integrations.router, prefix="/api/v1")
 app.include_router(webhooks.router, prefix="/api/v1")
 
 

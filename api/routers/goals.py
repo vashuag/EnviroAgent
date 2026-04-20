@@ -149,6 +149,57 @@ def create_goal(
         release_connection(conn)
 
 
+# ── GET /agents ───────────────────────────────────────────────────────────────
+
+@router.get("/agents")
+def list_agents(current_user: Annotated[dict, Depends(get_current_user)]):
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT a.*,
+                       g.title        AS "goalTitle",
+                       g.emoji        AS "goalEmoji",
+                       g.color        AS "goalColor",
+                       g."healthScore",
+                       g.status       AS "goalStatus"
+                FROM "Agent" a
+                JOIN "Goal" g ON g.id = a."goalId"
+                WHERE g."userId" = %s
+                ORDER BY a."createdAt" DESC
+                """,
+                (current_user["id"],),
+            )
+            return _rows_to_list(cur, cur.fetchall())
+    finally:
+        release_connection(conn)
+
+
+# ── GET /activity ──────────────────────────────────────────────────────────────
+
+@router.get("/activity")
+def list_activity(current_user: Annotated[dict, Depends(get_current_user)]):
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT al.*,
+                       g.emoji AS "goalEmoji"
+                FROM "ActivityLog" al
+                JOIN "Goal" g ON g.id = al."goalId"
+                WHERE g."userId" = %s
+                ORDER BY al."createdAt" DESC
+                LIMIT 100
+                """,
+                (current_user["id"],),
+            )
+            return _rows_to_list(cur, cur.fetchall())
+    finally:
+        release_connection(conn)
+
+
 # ── GET /goals ────────────────────────────────────────────────────────────────
 
 @router.get("")

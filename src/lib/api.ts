@@ -1,8 +1,8 @@
 import "server-only"
 import { auth } from "@/lib/auth"
-import type { ApiGoal } from "@/lib/goal-types"
+import type { ApiGoal, ApiAgentWithGoal, ApiActivityWithGoal, ApiIntegration } from "@/lib/goal-types"
 
-export type { ApiGoal, ApiAgent, ApiActivityItem } from "@/lib/goal-types"
+export type { ApiGoal, ApiAgent, ApiActivityItem, ApiAgentWithGoal, ApiActivityWithGoal, ApiIntegration } from "@/lib/goal-types"
 
 const API_URL = process.env.API_URL ?? "http://localhost:8000"
 
@@ -22,6 +22,42 @@ export async function fetchGoals(): Promise<ApiGoal[]> {
   if (!headers) return []
   try {
     const res = await fetch(`${API_URL}/api/v1/goals`, { headers, cache: "no-store" })
+    if (!res.ok) return []
+    return res.json()
+  } catch {
+    return []
+  }
+}
+
+export async function fetchAgents(): Promise<ApiAgentWithGoal[]> {
+  const headers = await internalHeaders()
+  if (!headers) return []
+  try {
+    const res = await fetch(`${API_URL}/api/v1/goals/agents`, { headers, cache: "no-store" })
+    if (!res.ok) return []
+    return res.json()
+  } catch {
+    return []
+  }
+}
+
+export async function fetchActivity(): Promise<ApiActivityWithGoal[]> {
+  const headers = await internalHeaders()
+  if (!headers) return []
+  try {
+    const res = await fetch(`${API_URL}/api/v1/goals/activity`, { headers, cache: "no-store" })
+    if (!res.ok) return []
+    return res.json()
+  } catch {
+    return []
+  }
+}
+
+export async function fetchIntegrations(): Promise<ApiIntegration[]> {
+  const headers = await internalHeaders()
+  if (!headers) return []
+  try {
+    const res = await fetch(`${API_URL}/api/v1/integrations`, { headers, cache: "no-store" })
     if (!res.ok) return []
     return res.json()
   } catch {
