@@ -10,3 +10,17 @@ node_modules
 *.log
 .DS_Store
 src/generated
+api/
+api/.venv/
+api/__pycache__/
+api/**/*.pyc
+*.py
+requirements.txt
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+node_modules/
+*.log

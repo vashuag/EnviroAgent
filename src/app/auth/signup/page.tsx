@@ -1,163 +1,116 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 
 export default function SignUpPage() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  })
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [form, setForm] = useState({ name: "", email: "", password: "" })
+  const [showPw, setShowPw] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
+    setLoading(true)
     setError("")
-
     try {
-      const response = await fetch("/api/auth/signup", {
+      const res = await fetch("/api/auth/signup", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
       })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || "Something went wrong")
-      }
-
-      // Redirect to sign in page with success message
-      router.push("/auth/signin?message=Account created successfully! Please sign in.")
-    } catch (error) {
-      setError(error instanceof Error ? error.message : "Something went wrong")
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || "Something went wrong")
+      router.push("/auth/signin?message=Account created! Please sign in.")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong")
     } finally {
-      setIsLoading(false)
+      setLoading(false)
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    })
+  const fieldStyle: React.CSSProperties = {
+    width: "100%", padding: "11px 14px",
+    background: "#0d1c32", border: "1px solid rgba(255,255,255,0.1)",
+    borderRadius: "8px", color: "#dce9f7", fontSize: "0.9rem",
+    outline: "none", boxSizing: "border-box",
+  }
+  const labelStyle: React.CSSProperties = {
+    display: "block", fontSize: "0.75rem", fontWeight: 500,
+    color: "#4a6a8a", marginBottom: "6px",
+    textTransform: "uppercase", letterSpacing: "0.06em",
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">Create your account</CardTitle>
-            <CardDescription>
-              Join Vashu Startup and start your journey with us
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
-                  {error}
-                </div>
-              )}
+    <div style={{ minHeight: "100vh", background: "#070f1c", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
+      <div style={{ position: "fixed", top: "20%", left: "50%", transform: "translateX(-50%)", width: "500px", height: "300px", background: "radial-gradient(ellipse, rgba(62,207,198,0.1) 0%, transparent 70%)", pointerEvents: "none" }} />
 
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name
-                </label>
-                <Input
-                  id="name"
-                  name="name"
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Enter your full name"
-                />
-              </div>
+      <div style={{ width: "100%", maxWidth: "420px", position: "relative" }}>
+        {/* Logo */}
+        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+          <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
+            <Image src="/enviroagent.png" alt="EnviroAgent" width={40} height={40} style={{ borderRadius: "10px" }} />
+            <span style={{ fontFamily: "var(--font-display, serif)", fontSize: "1.2rem", color: "#dce9f7" }}>EnviroAgent</span>
+          </Link>
+        </div>
 
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Enter your email"
-                />
-              </div>
+        <div style={{ background: "#0d1c32", borderRadius: "16px", border: "1px solid rgba(255,255,255,0.07)", padding: "32px", boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
+          <h1 style={{ fontFamily: "var(--font-display, serif)", fontSize: "1.75rem", fontWeight: 400, color: "#dce9f7", margin: "0 0 6px", textAlign: "center" }}>
+            Create your account
+          </h1>
+          <p style={{ fontSize: "0.85rem", color: "#4a6a8a", textAlign: "center", margin: "0 0 28px" }}>
+            Join EnviroAgent and start winning
+          </p>
 
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  Password
-                </label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    required
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder="Create a password"
-                  />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-gray-400" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-gray-400" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating Account...
-                  </>
-                ) : (
-                  "Create Account"
-                )}
-              </Button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
-                Already have an account?{" "}
-                <Link href="/auth/signin" className="font-medium text-primary hover:underline">
-                  Sign in
-                </Link>
-              </p>
+          {error && (
+            <div style={{ padding: "10px 14px", background: "rgba(251,113,133,0.1)", border: "1px solid rgba(251,113,133,0.3)", borderRadius: "8px", fontSize: "0.83rem", color: "#fb7185", marginBottom: "18px" }}>
+              {error}
             </div>
-          </CardContent>
-        </Card>
+          )}
+
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div>
+              <label style={labelStyle}>Full name</label>
+              <input type="text" required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Your full name" style={fieldStyle} />
+            </div>
+
+            <div>
+              <label style={labelStyle}>Email address</label>
+              <input type="email" required value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="you@email.com" style={fieldStyle} />
+            </div>
+
+            <div>
+              <label style={labelStyle}>Password</label>
+              <div style={{ position: "relative" }}>
+                <input type={showPw ? "text" : "password"} required value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} placeholder="Create a password" style={{ ...fieldStyle, paddingRight: "44px" }} />
+                <button type="button" onClick={() => setShowPw(p => !p)} style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#4a6a8a" }}>
+                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" disabled={loading} style={{
+              display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+              padding: "12px 20px", background: loading ? "rgba(62,207,198,0.5)" : "#3ecfc6",
+              border: "none", borderRadius: "8px", color: "#070f1c",
+              fontWeight: 700, fontSize: "0.95rem", cursor: loading ? "not-allowed" : "pointer",
+              marginTop: "4px",
+            }}>
+              {loading ? <><Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> Creating…</> : "Create account"}
+            </button>
+          </form>
+
+          <p style={{ fontSize: "0.83rem", color: "#4a6a8a", textAlign: "center", marginTop: "20px" }}>
+            Already have an account?{" "}
+            <Link href="/auth/signin" style={{ color: "#3ecfc6", textDecoration: "none", fontWeight: 500 }}>Sign in</Link>
+          </p>
+        </div>
       </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   )
 }
