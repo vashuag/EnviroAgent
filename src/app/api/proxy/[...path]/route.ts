@@ -1,6 +1,8 @@
 import { auth } from "@/lib/auth"
 import { NextRequest, NextResponse } from "next/server"
 
+export const maxDuration = 30
+
 const API_URL = process.env.API_URL ?? "http://localhost:8000"
 
 async function proxy(req: NextRequest): Promise<NextResponse> {
